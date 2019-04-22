@@ -1,0 +1,27 @@
+{
+  "name": "tetris",
+  "version": "0.0.1",
+  "description": "A simple tetris clone",
+  "devDependencies": {
+    "typescript": "^3.4.4",
+    "parcel": "^1.12.3",
+    "ts-node": "^8.1.0"
+  },
+  "browserslist": [
+    "since 2017-06"
+  ],
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damnjan/tetris.git"
+  },
+  "keywords": [],
+  "author": "Damnjan Lukovic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damnjan/tetris/issues"
+  },
+  "homepage": "https://github.com/damnjan/tetris#readme"
+}
