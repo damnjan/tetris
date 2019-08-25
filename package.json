@@ -2,17 +2,26 @@
   "name": "tetris",
   "version": "0.0.1",
   "description": "A simple tetris clone",
+  "dependencies": {
+    "rxjs": "^6.5.2"
+  },
   "devDependencies": {
-    "typescript": "^3.4.4",
+    "firebase": "^6.4.2",
     "parcel": "^1.12.3",
-    "ts-node": "^8.1.0"
+    "prettier": "^1.18.2",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "sass": "^1.22.10",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.5.3"
   },
   "browserslist": [
     "since 2017-06"
   ],
   "scripts": {
-    "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "start": "parcel example/index.html",
+    "build": "parcel build src/index.ts",
+    "build:example": "parcel build example/index.html --no-source-maps --out-dir=example/build"
   },
   "repository": {
     "type": "git",

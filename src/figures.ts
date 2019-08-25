@@ -16,7 +16,7 @@ export class Z2 extends Figure {
   }
 }
 
-export class Square extends Figure {
+export class O extends Figure {
   color = '#ff59cd'
 
   constructor() {
@@ -52,10 +52,6 @@ export class T extends Figure {
   color = '#9757ff'
 
   constructor() {
-    super([
-      '   ',
-      '###',
-      ' # ',
-    ])
+    super(['   ', '###', ' # '])
   }
 }

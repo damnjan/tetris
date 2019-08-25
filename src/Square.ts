@@ -1,4 +1,4 @@
-class Piece {
+class Square {
   color: string
 
   constructor(color: string) {
@@ -6,4 +6,4 @@ class Piece {
   }
 }
 
-export default Piece
+export default Square
