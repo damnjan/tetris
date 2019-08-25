@@ -1,8 +1,10 @@
-import { Z, Z2, I, L, L2, T, Square } from './figures'
-import Figure from './Figure'
-import Piece from './Piece'
+import { Subject, Subscription, fromEvent, interval } from 'rxjs'
 
-const squareWidth = 30
+import { Z, Z2, I, L, L2, T, O } from './figures'
+import Figure from './Figure'
+import Square from './Square'
+
+const squareWidth = 32
 const numSquaresX = 10
 const numSquaresY = 20
 const canvasWidth = squareWidth * numSquaresX
@@ -15,7 +17,7 @@ function createGrid(): Grid {
 }
 
 function createRandomFigure(): Figure {
-  const figures = [Z, Z2, I, L, L2, T, Square]
+  const figures = [Z, Z2, I, L, L2, T, O]
   const random = Math.floor(Math.random() * figures.length - 1) + 1
   return new figures[random]()
 }
@@ -32,7 +34,7 @@ function drawSquare(
   context.fillRect(x + 1, y + 1, squareWidth - 2, squareWidth - 2)
 }
 
-type Grid = Array<Array<null | Piece>>
+type Grid = Array<Array<null | Square>>
 
 class Game {
   canvas: HTMLCanvasElement
@@ -41,6 +43,9 @@ class Game {
   activeFigure: Figure
   score = 0
   listenersAdded = false
+  tickerSubscription: Subscription
+  scoreSubject: Subject<number> = new Subject()
+  gameOverSubject: Subject<number> = new Subject()
 
   constructor(canvas) {
     this.canvas = canvas
@@ -50,7 +55,6 @@ class Game {
     canvas.style.background = 'black'
 
     this.addListeners()
-
     this.init()
   }
 
@@ -64,7 +68,7 @@ class Game {
   addListeners() {
     this.listenersAdded = true
 
-    document.addEventListener('keydown', event => {
+    fromEvent<KeyboardEvent>(document, 'keydown').subscribe(event => {
       if (event.code === 'ArrowLeft' && this.canMoveLeft()) {
         this.activeFigure.moveLeft()
         this.draw()
@@ -97,13 +101,12 @@ class Game {
   freezeActiveFigure() {
     this.activeFigure.coords.forEach(coord => {
       const [y, x] = coord
-      this.grid[y][x] = new Piece(this.activeFigure.color)
+      this.grid[y][x] = new Square(this.activeFigure.color)
     })
   }
 
   draw() {
     const { context, grid } = this
-    // context.clearRect(0, 0, canvasWidth, canvasHeight)
     grid.forEach((row, i) => {
       row.forEach((item, j) => {
         const y = i * squareWidth
@@ -112,7 +115,7 @@ class Game {
           drawSquare(context, item.color, x, y)
         } else if (
           this.activeFigure.coords.find(
-            piece => piece[0] === i && piece[1] === j
+            square => square[0] === i && square[1] === j
           )
         ) {
           drawSquare(context, this.activeFigure.color, x, y)
@@ -129,8 +132,9 @@ class Game {
     let cleared = 0
     for (let i = 0; i < grid.length; i++) {
       if (grid[i].every(item => !!item)) {
-        grid[i].forEach(square => square.color = 'white')
+        grid[i].forEach(square => (square.color = 'white'))
         this.draw()
+
         // drop all above rows one level down
         for (let k = i; k > 0; k--) {
           for (let j = 0; j < numSquaresX; j++) {
@@ -143,19 +147,24 @@ class Game {
 
     if (cleared) {
       this.setScore(this.score + cleared * cleared * 100)
-      // this.draw()
     }
   }
 
   setScore(score) {
     this.score = score
-    document.getElementById('score').innerText = this.score.toString()
+    this.scoreSubject.next(score)
   }
 
   isValidPosition() {
     return this.activeFigure.coords.every(coord => {
       const [y, x] = coord
-      return y >= 0 && x >= 0 && y < numSquaresY && x < numSquaresX && this.grid[y][x] === null
+      return (
+        y >= 0 &&
+        x >= 0 &&
+        y < numSquaresY &&
+        x < numSquaresX &&
+        this.grid[y][x] === null
+      )
     })
   }
 
@@ -183,32 +192,34 @@ class Game {
     })
   }
 
-
   nextFigure() {
     this.freezeActiveFigure()
     this.checkCleared()
     this.activeFigure = createRandomFigure()
     this.setScore(this.score + 10)
     if (!this.canMoveDown()) {
-      alert('Game over!')
-      this.reset()
+      this.gameOverSubject.next(this.score)
     }
   }
 
   start() {
     this.draw()
-    setInterval(() => {
+    this.tickerSubscription = interval(1000).subscribe(() => {
       if (this.canMoveDown()) {
         this.activeFigure.moveDown()
       } else {
         this.nextFigure()
       }
       this.draw()
-    }, 1000)
+    })
   }
 
   reset() {
     this.init()
+  }
+
+  stop() {
+    this.tickerSubscription.unsubscribe()
   }
 }
 
