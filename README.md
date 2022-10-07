@@ -2,7 +2,7 @@
 
 A simple tetris clone written in TypeScript using native canvas and a little bit of Rx.js
 
-[Demo](http://tetris.damnjan.net)
+[Demo](http://tetris.damnjan.dev)
 
 ![](demo.gif)
 
